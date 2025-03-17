@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>아이디 중복 확인</title>
+<script type="text/javascript" src="../js/userScript.js"></script>
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.fluid.classless.jade.min.css">
+</head>
+<body>
+	<div>
+		<div th:if="${result}">
+			<h3>[[${id}]]는 사용중입니다.</h3>
+			<br>
+			<form action="/user/checkId" name="writeForm">
+				<fieldset role="group">
+					<legend> 아이디 </legend>
+					<input type="text" name="id" placeholder="다른 아이디 입력" /> <input
+						type="button" value="중복체크" onclick="incheckId()">
+
+
+				</fieldset>
+			</form>
+		</div>
+		<div th:if="${!result}">
+			<h3>[[${id}]]는 사용 가능합니다.</h3>
+			<br>
+			<button type="button" th:onclick="checkIdClose([[${id}]])">사용</button>
+		</div>
+	</div>
+</body>
+</html>

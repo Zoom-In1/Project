@@ -1,0 +1,18 @@
+create table usertable(
+    name varchar2(30) not null, -- 이름
+    id varchar2(30) primary key, -- 아이디
+    pwd varchar2(30) not null, -- 비밀번호
+    age date not null, -- 생년월일
+    gender varchar2(30) not null, -- 성별
+    email varchar2(30) not null, -- 이메일
+    tel varchar2(30) not null, -- 전화번호
+    logtime date not null, -- 가입시간
+    role varchar2(20) not null -- 관리자, 사용자
+);
+select * from usertable;
+
+-- 관리자 추가
+--update usertable set role='ADMIN' where id='admin';
+
+-- 이메일 컬럼에 고유 제약 조건 추가
+alter table usertable add unique(email);

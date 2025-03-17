@@ -1,0 +1,238 @@
+/* 커스텀 오버레이 박스 스타일 */
+.wrap {
+	position: absolute;
+	left: 50%; /* 오버레이를 가로 중앙에 맞추기 */
+	bottom: 60px; /* 마커 위에 배치하기 위해 필요한 간격 */
+	transform: translateX(-50%); /* 가로 중앙을 맞추기 위해 가로 이동 */
+	width: 288px;
+	height: 132px;
+	text-align: left;
+	overflow: hidden;
+	font-size: 12px;
+	font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;
+	line-height: 1.5;
+}
+
+.wrap * {
+	padding: 0;
+	margin: 0;
+}
+
+.wrap .info {
+	width: 286px;
+	height: 120px;
+	border-radius: 5px;
+	border-bottom: 2px solid #ccc;
+	border-right: 1px solid #ccc;
+	overflow: hidden;
+	background: #fff;
+}
+
+/* 첫 번째 정보 박스에 그림자 추가 */
+.wrap .info:nth-child(1) {
+	border: 0;
+	box-shadow: 0px 1px 2px #888;
+}
+
+/* 제목 스타일 */
+.info .title {
+	padding: 5px 0 0 10px;
+	height: 30px;
+	background: #eee;
+	border-bottom: 1px solid #ddd;
+	font-size: 18px;
+	font-weight: bold;
+}
+
+/* 닫기 버튼 스타일 */
+.info .close {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	color: #888;
+	width: 17px;
+	height: 17px;
+	background:
+		url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/overlay_close.png');
+}
+
+.info .close:hover {
+	cursor: pointer;
+}
+
+/* 정보 박스 본문 스타일 */
+.info .body {
+	position: relative;
+	overflow: hidden;
+}
+
+/* 설명 텍스트 위치 및 스타일 */
+.info .desc {
+	position: relative;
+	margin: 13px 0 0 90px;
+	height: 75px;
+}
+
+/* 생략(...) 처리 스타일 */
+.desc .ellipsis {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* 지번 주소 스타일 */
+.desc .jibun {
+	font-size: 11px;
+	color: #888;
+	margin-top: -2px;
+}
+
+/* 이미지 영역 스타일 */
+.info .img {
+	position: absolute;
+	top: 6px;
+	left: 5px;
+	width: 73px;
+	height: 71px;
+	border: 1px solid #ddd;
+	color: #888;
+	overflow: hidden;
+}
+
+/* 커스텀 오버레이 아래 삼각형 모양 추가 */
+.info:after {
+	content: '';
+	position: absolute;
+	margin-left: -12px;
+	left: 50%;
+	bottom: 0;
+	width: 22px;
+	height: 12px;
+	background:
+		url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png');
+}
+
+/* 링크 스타일 */
+.info .link {
+	color: #5085BB;
+}
+/* 검색창과 지도를 나란히 배치 */
+.map-container {
+	display: flex;
+	width: 100%;
+}
+
+/* 검색창 스타일 */
+#search-container {
+	height: 790px; /* 세로 높이 고정 */
+	width: 30%;
+	padding: 0 20px 20px 20px;  /*위쪽 패딩을 0으로 설정, 나머지는 유지*/ 
+	overflow-y: auto; /* 세로 스크롤 생성 */
+
+}
+
+/* 검색창 폼 고정 */
+form {
+	position: sticky;
+	top: 0;
+	background-color: white; /* 스크롤 시 배경 고정 */
+	z-index: 10;
+	padding-top: 20px; /* 폼 상단 여백 */
+	padding-bottom: 10px; /* 폼 하단 여백 */
+}
+
+/* 필터 섹션 스타일 */
+#filter-section {
+	margin-top: 20px;
+}
+
+/* 버튼을 한 줄로 나란히 배치하고 각 버튼의 너비를 설정 */
+.filter-buttons {
+    display: flex;
+    justify-content: space-between; /* 버튼 사이에 공간을 균등하게 분배 */
+    gap: 10px; /* 버튼 간 간격을 줌 */
+}
+
+.filter-buttons input[type="submit"] {
+    flex: 2; /* "필터 적용하기" 버튼이 2/3 차지 */
+}
+
+.filter-buttons input[type="reset"] {
+    flex: 1; /* "필터 초기화" 버튼이 1/3 차지 */
+}
+
+/* 지도 영역 스타일 */
+#map {
+	flex: 1;
+	height: 790px;
+	position: relative;
+	overflow: hidden;
+}
+
+/* 검색결과 목록 card */
+
+#placesList {
+    padding-left: 0; /* padding 제거 */
+    margin-left: 0;  /* margin 제거 */
+    list-style-type: none; /* 리스트 스타일 제거 */
+}
+
+.item {
+  list-style-type: none;
+  padding-inline-start: 0px;
+}
+
+article {
+    flex-direction: column; /* 텍스트를 수직으로 배치 */
+    justify-content: center; /* 텍스트 수직 가운데 정렬 */
+    justify-content: flex-start; /* 이미지를 왼쪽에 배치 */
+}
+
+.star {
+    width: 20px;  /* 별 크기 */
+    height: 20px; /* 별 높이 */
+    margin-right: 5px; /* 별 사이 간격 */
+}
+
+/* 이미지와 제목만 한 줄에 나오도록 설정 */
+.title-with-icon {
+    display: flex; /* 수평 정렬을 위한 flex 레이아웃 */
+    align-items: center; /* 이미지와 텍스트를 수직 가운데 정렬 */
+}
+
+/* 마커 이미지 크기를 조정 */
+.title-with-icon img {
+    width: 40px;
+    height: 40px;
+    margin-right: 5px; /* 이미지와 텍스트 사이 간격 */
+}
+
+/* h5 태그의 기본 여백 제거 */
+.title-with-icon h5 {
+    margin: 0;
+}
+
+article .pic {
+    display: flex; /* 수평 정렬을 위한 flex 레이아웃 */
+    flex-direction: column; /* 텍스트를 수직으로 배치 */
+    justify-content: flex-start; /* 이미지를 왼쪽부터 배치 */
+}
+
+/* 이미지 크기를 고정 */
+.main_pic {
+    height: 150px;           /* 이미지의 높이를 고정 */
+    width: auto;            /* 가로 비율을 자동으로 조정 */
+    max-width: none;        /* 가로 크기가 고정되지 않도록 설정 */
+    object-fit: scale-down; /* 이미지를 비율에 맞게 줄어들도록 설정 */
+    margin-right: 15px;     /* 이미지 사이의 여백 */
+}
+
+/* 나머지 텍스트 요소들은 한 줄씩 출력 */
+article span {
+    display: block; /* 각 요소를 블록 요소로 설정해 한 줄에 하나씩 출력 */
+    margin-bottom: 5px; /* 각 텍스트 요소 간 여백 추가 */
+}
+
+
+
+

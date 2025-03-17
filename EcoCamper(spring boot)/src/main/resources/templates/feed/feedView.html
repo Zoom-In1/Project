@@ -1,0 +1,759 @@
+ <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">  
+ <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+	    var likeButtons = document.querySelectorAll('.like-button');
+	    var saveButtons = document.querySelectorAll('.save-button');
+	    
+	    likeButtons.forEach(function(button) {
+	    	var userId = document.body.dataset.userId;
+	        var reviewId = button.getAttribute('data-review-id');
+
+	        // 페이지 로드 시 좋아요 상태와 개수를 가져옴
+	        fetch(`/isLiked/${reviewId}?userId=${userId}`)
+	            .then(response => response.json())
+	            .then(isLiked => {
+	                var likeIcon = button.querySelector('.like-icon');
+	                if (isLiked === null || isLiked === undefined) {
+	                    isLiked = false;
+	                }
+	                if (isLiked) {
+	                    likeIcon.src = '../images/fire.png';
+	                    button.dataset.liked = "true";
+	                } else {
+	                    likeIcon.src = '../images/non-fire.png';
+	                    button.dataset.liked = "false";
+	                }
+	            })
+	            .catch(error => {
+	                console.error('Error:', error);
+	                var likeIcon = button.querySelector('.like-icon');
+	                likeIcon.src = '../images/non-fire.png';
+	                button.dataset.liked = "false";
+	            });
+
+	        // 좋아요 개수 가져오기
+	        updateLikeCount(reviewId);
+	    });
+	    
+	    saveButtons.forEach(function(button) {
+	        var save_seq = button.getAttribute('data-save-seq');
+			var save_id = document.body.dataset.userId;
+	        // 페이지 로드 시 저장 상태 가져오기
+	        fetch(`/isSave/${save_seq}?save_id=${save_id}`)
+	            .then(response => response.json())
+	            .then(isSaved => {
+	                var saveIcon = button.querySelector('.save-icon');
+	                if (isSaved === null || isSaved === undefined) {
+	                    isSaved = false;
+	                }
+	                if (isSaved) {
+	                    saveIcon.src = '../images/tent.png';
+	                    button.dataset.saved = "true";
+	                } else {
+	                    saveIcon.src = '../images/non-tent.png';
+	                    button.dataset.saved = "false";
+	                }
+	            })
+	            .catch(error => {
+	                console.error('Error:', error);
+	                var saveIcon = button.querySelector('.save-icon');
+	                saveIcon.src = '../images/non-tent.png';
+	                button.dataset.saved = "false";
+	            });
+	    });
+
+	    
+	    
+	    // 스와이퍼 초기화
+	    var swiperContainers = document.querySelectorAll('.swiper-container');
+	    swiperContainers.forEach(function(container) {
+	        var slides = container.querySelectorAll('.swiper-slide');
+	        if (slides.length > 1) {
+	            new Swiper(container, {
+	                slidesPerView: 1,
+	                spaceBetween: 10,
+	                pagination: {
+	                    el: '.swiper-pagination',
+	                    clickable: true,
+	                    renderBullet: function (index, className) {
+	                        return '<span class="' + className + '"></span>';
+	                    }
+	                },
+	                navigation: {
+	                    nextEl: '.swiper-button-next',
+	                    prevEl: '.swiper-button-prev',
+	                },
+	            });
+	        }
+	    });
+
+	    function updateLikeCount(reviewId) {
+	        fetch(`/count/${reviewId}`)
+	            .then(response => response.json())
+	            .then(count => {
+	                document.getElementById('like-count').textContent = count;
+	            })
+	            .catch(error => console.error('Error:', error));
+	    }
+
+	    document.querySelectorAll('.like-button').forEach(function(button) {
+	        button.addEventListener('click', function() {
+	            var likeIcon = button.querySelector('.like-icon');
+	            var isLiked = button.dataset.liked === "true";
+	            var reviewId = button.getAttribute('data-review-id');
+	            var userId = document.body.dataset.userId;
+
+	            if (!userId) {
+	                console.error('사용자 ID가 설정되지 않았습니다.');
+	                return;
+	            }
+
+	            var url = isLiked ? `/remove?reviewId=${reviewId}&userId=${userId}` : '/add';
+	            var method = isLiked ? 'DELETE' : 'POST';
+
+	            fetch(url, {
+	                method: method,
+	                headers: {
+	                    'Content-Type': 'application/json'
+	                },
+	                body: JSON.stringify({ review_id: parseInt(reviewId), user_id: userId })
+	            })
+	            .then(response => response.text())
+	            .then(() => {
+	                if (isLiked) {
+	                    likeIcon.src = '../images/non-fire.png';
+	                    button.dataset.liked = "false";
+	                } else {
+	                    likeIcon.src = '../images/fire.png';
+	                    button.dataset.liked = "true";
+	                }
+	                updateLikeCount(reviewId); // 좋아요 수 업데이트
+	            })
+	            .catch(error => console.error('Error:', error));
+	        });
+	    });
+
+	    document.querySelectorAll('.save-button').forEach(function(button) {
+	        button.addEventListener('click', function() {
+	            var SaveIcon = button.querySelector('.save-icon');
+	            var isSave = button.dataset.saved === "true";
+	            var save_seq = button.getAttribute('data-save-seq');
+	            var save_id = document.body.dataset.userId;
+
+	            if (!save_id) {
+	                console.error('사용자 ID가 설정되지 않았습니다.');
+	                return;
+	            }
+
+	            var url = isSave ? `/mius?save_seq=${save_seq}&save_id=${save_id}` : '/pulse';
+	            var method = isSave ? 'DELETE' : 'POST';
+
+	            fetch(url, {
+	                method: method,
+	                headers: {
+	                    'Content-Type': 'application/json'
+	                },
+	                body: JSON.stringify({ save_seq: parseInt(save_seq), save_id: save_id })
+	            })
+	            .then(response => response.text())
+	            .then(() => {
+	                if (isSave) {
+	                    SaveIcon.src = '../images/non-tent.png';
+	                    button.dataset.saved = "false";
+	                } else {
+	                	SaveIcon.src = '../images/tent.png';
+	                    button.dataset.saved = "true";
+	                }
+	            })
+	            .catch(error => console.error('Error:', error));
+	        });
+	    });
+	    document.getElementById('submit-reply').addEventListener('click', function() {
+	        var content = document.getElementById('reply-content').value;
+	        var seq = this.getAttribute('data-feed-id');
+
+	        if (!content) {
+	            alert('댓글을 입력하세요.');
+	            return;
+	        }
+
+	        fetch('/reply', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/json'
+	            },
+	            body: JSON.stringify({
+	                seq: parseInt(seq),
+	                writer: document.body.dataset.userId,
+	                content: content
+	            })
+	        })
+	        .then(response => response.json())
+	        .then(reply => {
+	            addReplyToDOM(reply);
+	            document.getElementById('reply-content').value = '';
+
+	            // 댓글 개수 업데이트
+	            updateReplyCount(); // 이 함수 호출
+	        })
+	        .catch(error => console.error('Error:', error));
+	    });
+
+	    function addReplyToDOM(reply) {
+	    	var userId = document.body.dataset.userId;
+	        var repliesContainer = document.querySelector('.replies');
+	        var replyElement = document.createElement('div');
+	        replyElement.className = 'reply';
+	        var isAuthor = reply.writer === userId;
+
+	        replyElement.innerHTML = `
+	            <div class="reply-content-container">
+	                <div class="reply-content">
+	                    <p><strong>${reply.writer}</strong>: ${reply.content}</p>
+	                    <p class="reply-date">${new Date(reply.logtime).toLocaleString()}</p>
+	                </div>
+	                <div class="reply-actions">
+	                    ${isAuthor ? `<button class="delete-reply" data-reply-id="${reply.num}">
+	                                    <img src="../images/cancel.png" class="delete-reply-icon" alt="Delete-reply Icon">
+	                                  </button>` : ''}
+	                </div>
+	            </div>
+	        `;
+	        // 댓글 삭제 버튼에 클릭 이벤트 리스너 추가
+	        var deleteButton = replyElement.querySelector('.delete-reply');
+	        if (deleteButton) {
+	            deleteButton.addEventListener('click', function() {
+	                deleteReply(deleteButton);
+	            });
+	        }
+
+	        repliesContainer.appendChild(replyElement);
+	    }
+
+	    function deleteReply(button) {
+	        var replyId = button.getAttribute('data-reply-id');
+	        fetch(`/deleteReply/${replyId}`, {
+	            method: 'DELETE',
+	            headers: {
+	                'Content-Type': 'application/json'
+	            }
+	        })
+	        .then(response => response.text())
+	        .then(() => {
+	            // 삭제 후 댓글 요소 제거
+	            button.closest('.reply').remove();
+	            // 댓글 개수 업데이트
+	            updateReplyCount(); // 이 함수 호출
+	        })
+	        .catch(error => console.error('Error:', error));
+	    }
+
+	    function updateReplyCount() {
+	        var replyCount = document.querySelectorAll('.reply').length;
+	        document.getElementById('reply-count').textContent = replyCount; // 댓글 개수 업데이트
+	        document.getElementById('comment-count').textContent = replyCount; // 댓글 개수 업데이트
+	    }
+
+	    function loadReplies() {
+	        var seq = document.getElementById('submit-reply').getAttribute('data-feed-id');
+
+	        fetch(`/replies/${seq}`)
+	            .then(response => response.json())
+	            .then(replies => {
+	                if (Array.isArray(replies)) {
+	                    var replyCount = replies.length; // 댓글 개수
+	                    document.getElementById('reply-count').textContent = replyCount; // 댓글 개수 업데이트
+	                    document.getElementById('comment-count').textContent = replyCount; // 댓글 개수 업데이트
+
+	                    replies.forEach(reply => {
+	                        addReplyToDOM(reply);
+	                    });
+	                } else {
+	                    console.error('Expected an array of replies, but got:', replies);
+	                }
+	            })
+	            .catch(error => console.error('Error:', error));
+	    }
+	    loadReplies(); // 페이지 로드 시 댓글 불러오기
+	    
+	    // 이모티콘 클릭 이벤트 핸들러
+	    document.querySelectorAll('.emoji').forEach(function(emoji) {
+	        emoji.addEventListener('click', function() {
+	            var replyContent = document.getElementById('reply-content');
+	            replyContent.value += this.textContent;
+	        });
+	    });
+	});
+</script>
+<style>
+body {
+	font-family: 'Arial', sans-serif;
+	background-color: #f9f9f9;
+	margin: 0;
+	padding: 0;
+	color: #333;
+}
+
+.feed-container {
+	max-width: 900px;
+	margin: 30px auto;
+	padding: 20px;
+	background-color: #fff;
+	border-radius: 8px;
+	box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.user_id {
+	padding: 10px;
+	font-size: 20px;
+	font-weight: bold;
+	color: #444;
+	border-bottom: 2px solid #ddd;
+	margin-bottom: 20px;
+}
+
+.feed-video video {
+	width: 100%;
+	height: 800px;
+	border-radius: 8px;
+	object-fit: cover;
+}
+
+.feed_img {
+	position: relative;
+	width: 100%;
+	overflow: hidden;
+	border-radius: 8px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	margin-bottom: 20px;
+}
+
+.feed_img .swiper-container {
+	width: 100%;
+	height: 400px;
+	border-radius: 8px;
+	position: relative;
+}
+
+.swiper-slide {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.swiper-slide img {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: cover;
+	border: none;
+	border-radius: 8px;
+	outline: none;
+}
+
+.feed-details {
+	padding: 15px;
+	border-top: 1px solid #ddd;
+}
+
+.feed-content {
+	font-size: 18px;
+	line-height: 1.5;
+	color: #555;
+	margin: 0;
+}
+
+.feed-date {
+	font-size: 14px;
+	color: #888;
+	margin-top: 10px;
+}
+
+.action-buttons-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 10px;
+	padding: 5px;
+	border-top: 1px solid #dbdbdb;
+	box-sizing: border-box;
+}
+
+.like-button-container, .choose-button-container {
+	display: flex;
+	align-items: center;
+}
+
+.like-button, .comment-button, .delete-button, .modify-button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 5px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.1s, transform 0.1s;
+	width: 50px;
+	height: 50px;
+}
+
+.like-button:hover, .comment-button:hover, .delete-button:hover,
+	.modify-button:hover {
+	background-color: rgba(255, 0, 0, 0.1); /* 호버 시 배경색 */
+}
+
+.like-button:active, .comment-button:active, .delete-button:active,
+	.modify-button:active {
+	transform: scale(0.9); /* 클릭 시 버튼 크기 축소 */
+}
+
+.like-icon, .comment-icon, .delete-icon, .modify-icon {
+	width: 120%;
+	height: 120%;
+	object-fit: contain;
+}
+
+.swiper-pagination {
+	bottom: 10px;
+	right: 10px;
+	position: absolute;
+	z-index: 10;
+}
+
+.swiper-pagination-bullet {
+	background: #bbb;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	margin: 0 4px;
+}
+
+.swiper-pagination-bullet-active {
+	background: #007bff;
+}
+
+.swiper-button-next, .swiper-button-prev {
+	color: #007bff;
+	width: 40px;
+	height: 40px;
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.swiper-button-next {
+	right: 10px;
+}
+
+.swiper-button-prev {
+	left: 10px;
+}
+
+.action-buttons {
+	display: flex;
+	justify-content: center; /* 가로 중앙 정렬 */
+	margin-top: 20px; /* 상단 여백 추가 (필요에 따라 조절) */
+}
+
+.action-buttons a {
+	text-decoration: none; /* 링크 밑줄 제거 */
+	color: #007bff; /* 링크 색상 설정 (필요에 따라 조절) */
+	font-size: 18px; /* 글자 크기 설정 (필요에 따라 조절) */
+	font-weight: bold; /* 글자 두께 설정 (필요에 따라 조절) */
+}
+
+.reply-section {
+	margin-top: 20px;
+	padding: 10px;
+	border-top: 1px solid #ddd;
+}
+
+#reply-content {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	margin-bottom: 10px;
+	font-size: 16px;
+}
+
+#submit-reply {
+	padding: 10px 20px;
+	background-color: #007bff;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+#submit-reply:hover {
+	background-color: #0056b3;
+}
+
+.replies .reply {
+	margin-top: 15px;
+	padding: 10px;
+	border-bottom: 1px solid #ddd;
+}
+
+.reply-date {
+	font-size: 12px;
+	color: #888;
+}
+
+.reply-content-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.reply-content {
+	flex: 1; /* 댓글 내용이 가능한 공간을 모두 차지하도록 설정 */
+}
+
+.reply-actions {
+	display: flex;
+	align-items: center;
+}
+
+.delete-reply {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 5px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.1s, transform 0.1s;
+	width: 30px; /* 버튼 너비를 작게 조정 */
+	height: 30px; /* 버튼 높이를 작게 조정 */
+}
+
+.delete-reply:hover {
+	background-color: rgba(255, 0, 0, 0.1); /* 호버 시 배경색 */
+}
+
+.delete-reply:active {
+	transform: scale(0.9); /* 클릭 시 버튼 크기 축소 */
+}
+
+.delete-reply-icon {
+	width: 50%; /* 이미지 크기를 줄이기 */
+	height: 50%; /* 이미지 크기를 줄이기 */
+	object-fit: contain;
+}
+
+.comment-count {
+	font-size: 16px; /* 댓글 수 글자 크기 조정 */
+	margin-left: -10px; /* 댓글 수와 버튼 사이의 간격 조정 */
+	margin-bottom: -20px;
+}
+
+.like-count {
+	font-size: 16px; /* 댓글 수 글자 크기 조정 */
+	margin-left: -3Wpx; /* 댓글 수와 버튼 사이의 간격 조정 */
+	margin-bottom: -20px;
+}
+
+.label {
+	color: #00aaff; /* 하늘색으로 설정 */
+}
+
+#emoji-container {
+	margin-bottom: 10px;
+}
+
+#emoji-container {
+	position: relative;
+	margin-bottom: 10px;
+}
+
+#emoji-container summary {
+	cursor: pointer;
+	font-size: 25px;
+	border: none;
+	border-radius: 4px;
+	padding: 5px 10px;
+	background-color: #fafafa;
+	margin-bottom: 5px;
+	display: inline-block;
+	transition: background-color 0.3s;
+}
+
+#emoji-container summary:hover {
+	background-color: #f0f0f0;
+}
+
+#emoji-container details[open] .emoji-popup {
+	display: flex;
+}
+
+.emoji-popup {
+	display: none;
+	position: absolute;
+	top: 100%;
+	left: 0;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	padding: 10px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	z-index: 1000;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.emoji {
+	font-size: 24px;
+	cursor: pointer;
+	margin: 5px;
+}
+
+.save-button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 5px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.1s, transform 0.1s;
+	width: 50px; /* 버튼 너비 설정 */
+	height: 50px; /* 버튼 높이 설정 */
+}
+
+.save-button:hover {
+	background-color: rgba(255, 0, 0, 0.1); /* 호버 시 배경색 */
+}
+
+.save-button:active {
+	transform: scale(0.9); /* 클릭 시 버튼 크기 축소 */
+}
+
+.save-icon {
+	width: 120%;
+	height: 120%;
+	object-fit: contain;
+}
+
+.feed-tag {
+	margin-top: 20px; /* '장소'와 해시태그 사이의 간격 추가 */
+	color: #007bff; /* 파란색으로 설정 */
+	font-weight: bold; /* 글씨 두께를 굵게 설정 */
+	font-size: 16px; /* 글씨 크기 설정 */
+	margin-right: 5px; /* 태그 사이에 간격 추가 */
+}
+</style>
+<body th:data-user-id="${userId}">
+    <div class="feed-container">
+        <div class="user_id">
+            <span th:text="${feed.id}"></span>
+        </div>
+
+        <!-- 피드 이미지 또는 비디오 -->
+        <div th:if="${feed.feed_type == 'video'}" class="feed-video">
+            <video controls>
+                <source th:src="@{/storage/{filename}(filename=${feed.feed_file})}" type="video/mp4">
+            </video>
+        </div>
+
+        <div th:if="${feed.feed_type != 'video'}" class="feed_img">
+            <div th:if= "${feed.getImageFileNames().size() > 1}" class="swiper-container">
+                <div class="swiper-wrapper">
+                    <div th:each="image : ${feed.getImageFileNames()}" class="swiper-slide">
+                        <img th:src="@{/storage/{filename}(filename=${image})}" alt="Feed Image">
+                    </div>
+                </div>
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+            </div>
+            <div th:if="${feed.getImageFileNames().size() <= 1}">
+                <img th:src="@{/storage/{filename}(filename=${feed.getImageFileNames()[0]})}" alt="Feed Image">
+            </div>
+        </div>
+
+        <div class="feed-details">
+            <p class="feed-content" th:text="${feed.feed_content}"></p>
+            <p class="feed-date" th:text="${feed.logtime}"></p>
+           	<span class="label">장비 :</span>
+			<span th:text="${feed.goods}"></span><br><br>
+			<span class="label">장소 :</span>
+			<span th:text="${feed.place}"></span>
+			<p class="feed-tag" th:text="${feed.tags}">
+			</p>
+        </div>
+        <hr>
+		
+		
+		<div class="replies">
+		 	<span id="reply-count"></span>개의 댓글
+            <!-- 댓글이 여기에 동적으로 추가됨 -->
+
+		</div>
+
+        <div class="reply-section">
+            <textarea id="reply-content" placeholder="댓글을 작성하세요"></textarea>
+            <button id="submit-reply" th:data-feed-id="${feed.seq}">댓글 작성</button>
+            <div id="emoji-container">
+            <details>
+                <summary role="button">😀</summary>
+                <div class="emoji-popup">
+                        <span class="emoji">😀</span>
+    					<span class="emoji">😂</span>
+    					<span class="emoji">😍</span>
+    					<span class="emoji">😠</span>
+    					<span class="emoji">👍</span>
+    					<span class="emoji">❤️</span>
+    					<span class="emoji">💔</span>
+    					<span class="emoji">😭</span>
+    					<span class="emoji">🎉</span>
+    					<span class="emoji">🔥</span>
+    					<span class="emoji">🌟</span>
+    					<span class="emoji">💯</span>
+    					<span class="emoji">😜</span>
+    					<span class="emoji">💡</span>   						
+                </div>
+            </details>
+        </div>
+		
+        <div class="action-buttons-container">
+        	<div class="like-button-container">
+            	<button class="like-button" data-liked="false" th:data-review-id="${feed.seq}">
+                	<img src="../images/non-fire.png" class="like-icon" alt="Like Icon">
+            	</button>
+             		<span class="like-count" id="like-count"></span>
+             
+            	<button class="comment-button" th:onclick="location.href='feedReply?seq=[[${feed.seq}]]'">
+                	<img src="../images/talk.png" class="comment-icon" alt="Comment Icon">
+            	</button>
+            		<span class="comment-count" id="comment-count"></span>
+         	</div>
+         	
+            <div class="save-button-container">
+            	<button class="save-button" data-saved="false" th:data-save-seq="${feed.seq}">
+                	<img src="../images/non-tent.png" class="save-icon" alt="Save Icon">
+            	</button>
+        	</div>
+        
+        
+        <div class="choose-button-container">
+            <button class="delete-button" th:if="${userId == feed.id}" th:onclick="location.href = 'feedDelete?seq=[[${seq}]]'">
+                <img src="../images/trash.png" class="delete-icon" alt="Delete Icon">
+            </button>
+              <button class="modify-button" th:if="${userId == feed.id} and ${feed.feed_type == 'video'}" th:onclick="location.href = 'feedModifyFormVoD?seq=[[${seq}]]'">
+        		<img src="../images/modify.png" class="modify-icon" alt="Modify Icon">
+    		</button>
+    
+    		<!-- feed.type이 'photo'인 경우 수정 버튼 -->
+    		<button class="modify-button" th:if="${userId == feed.id} and ${feed.feed_type == 'img'}" th:onclick="location.href = 'feedModifyFormPh?seq=[[${seq}]]'">
+        		<img src="../images/modify.png" class="modify-icon" alt="Modify Icon">
+    		</button>
+        </div>
+    </div>
+</div>
+ 	<div class="action-buttons"></div>
+ </div>
+</body>
